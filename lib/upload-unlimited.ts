@@ -9,16 +9,18 @@ export async function uploadUnlimitedImages(
   name: string,
   pixelatedImages: PixelatedImage[],
   originalFileName: string,
+  groupType: string,
 ): Promise<string> {
   const supabase = getSupabaseClient()
 
-  // Convert name to base64 and take first 5 characters
   const base64Name = btoa(name).substring(0, 5)
 
   console.log("[v0] Base64 name:", base64Name)
+  console.log("[v0] Group type:", groupType)
 
-  // List existing folders in unlimited directory to find the next increment
-  const { data: existingFiles, error: listError } = await supabase.storage.from("images").list("unlimited", {
+  const groupTypePath = `unlimited/${groupType}`
+
+  const { data: existingFiles, error: listError } = await supabase.storage.from("images").list(groupTypePath, {
     limit: 1000,
     offset: 0,
   })
@@ -30,15 +32,13 @@ export async function uploadUnlimitedImages(
 
   console.log("[v0] Existing files:", existingFiles)
 
-  // Find all folders that start with our base64 prefix
   const matchingFolders =
-    existingFiles?.filter((file) => file.name.startsWith(base64Name)).map((file) => file.name) || []
+    existingFiles?.filter((file: { name: string }) => file.name.startsWith(base64Name)).map((file: { name: string }) => file.name) || []
 
   console.log("[v0] Matching folders:", matchingFolders)
 
-  // Find the highest increment number
   let maxIncrement = 0
-  matchingFolders.forEach((folderName) => {
+  matchingFolders.forEach((folderName: string) => {
     const match = folderName.match(/-(\d+)$/)
     if (match) {
       const increment = Number.parseInt(match[1], 10)
@@ -48,19 +48,19 @@ export async function uploadUnlimitedImages(
     }
   })
 
-  // Next increment
   const nextIncrement = maxIncrement + 1
   const folderName = `${base64Name}-${String(nextIncrement).padStart(3, "0")}`
 
-  console.log("[v0] Uploading to folder:", folderName)
+  console.log("[v0] Uploading to folder:", `${groupTypePath}/${folderName}`)
 
-  // Get file extension from original file
   const fileExtension = originalFileName.split(".").pop() || "png"
 
-  // Upload all pixelated images
-  const uploadPromises = pixelatedImages.map(async ({ pixelSize, blob }) => {
-    const fileName = `${name}_pixel_${pixelSize}.${fileExtension}`
-    const filePath = `unlimited/${folderName}/${fileName}`
+  const uploadPromises = pixelatedImages.map(async ({ pixelSize, blob }, index) => {
+    const isLastImage = index === pixelatedImages.length - 1
+    const fileName = isLastImage
+      ? `clear.${fileExtension}`
+      : `${String(index + 1).padStart(3, "0")}.${fileExtension}`
+    const filePath = `${groupTypePath}/${folderName}/${fileName}`
 
     console.log("[v0] Uploading:", filePath)
 
@@ -79,7 +79,7 @@ export async function uploadUnlimitedImages(
 
   await Promise.all(uploadPromises)
 
-  console.log("[v0] All images uploaded successfully to:", folderName)
+  console.log("[v0] All images uploaded successfully to:", `${groupTypePath}/${folderName}`)
 
-  return folderName
+  return `${groupType}/${folderName}`
 }

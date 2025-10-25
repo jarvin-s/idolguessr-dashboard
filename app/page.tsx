@@ -1,59 +1,103 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { createPixelatedVersions } from "@/lib/pixelate-image"
-import { uploadUnlimitedImages } from "@/lib/upload-unlimited"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { createPixelatedVersions } from "@/lib/pixelate-image";
+import { uploadUnlimitedImages } from "@/lib/upload-unlimited";
+import { uploadDailyImages } from "@/lib/upload-daily";
 
 export default function FormPage() {
-  const [name, setName] = useState("")
-  const [date, setDate] = useState("")
-  const [image, setImage] = useState<File | null>(null)
-  const [groupType, setGroupType] = useState<"boy-group" | "girl-group">("boy-group")
-  const [submissionType, setSubmissionType] = useState<"daily" | "unlimited">("unlimited")
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [pixelatedImages, setPixelatedImages] = useState<{ blob: Blob; pixelSize: number; url: string }[]>([])
-  const [uploadStatus, setUploadStatus] = useState<string>("")
+  const [name, setName] = useState("");
+  const [date, setDate] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [groupType, setGroupType] = useState<"boy-group" | "girl-group">(
+    "boy-group"
+  );
+  const [submissionType, setSubmissionType] = useState<"daily" | "unlimited">(
+    "unlimited"
+  );
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [pixelatedImages, setPixelatedImages] = useState<
+    { blob: Blob; pixelSize: number; url: string }[]
+  >([]);
+  const [uploadStatus, setUploadStatus] = useState<string>("");
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!image) return
+    if (!image) return;
 
-    setIsProcessing(true)
-    setUploadStatus("")
+    setIsProcessing(true);
+    setUploadStatus("");
 
     try {
-      const pixelSizes = [18, 15, 12, 9, 6]
-      const pixelatedImagesResult = await createPixelatedVersions(image, pixelSizes)
+      const pixelSizes = [18, 15, 12, 9, 6];
+      const pixelatedImagesResult = await createPixelatedVersions(
+        image,
+        pixelSizes
+      );
 
-      const imagesWithUrls = pixelatedImagesResult.map((img) => ({
+      const originalBlob = await new Promise<Blob>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          fetch(reader.result as string)
+            .then(res => res.blob())
+            .then(resolve)
+            .catch(reject);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(image);
+      });
+
+      const allImages = [
+        ...pixelatedImagesResult,
+        { pixelSize: 0, blob: originalBlob }
+      ];
+
+      const imagesWithUrls = allImages.map((img) => ({
         ...img,
         url: URL.createObjectURL(img.blob),
-      }))
-      setPixelatedImages(imagesWithUrls)
+      }));
+      setPixelatedImages(imagesWithUrls);
 
-      console.log("[v0] Generated pixelated images:", pixelatedImagesResult)
-      console.log("[v0] Form data:", { name, date, groupType, submissionType })
+      console.log("[v0] Generated images (5 pixelated + 1 clear):", allImages);
+      console.log("[v0] Form data:", { name, date, groupType, submissionType });
 
+      setUploadStatus("Uploading to storage...");
+      
       if (submissionType === "unlimited") {
-        setUploadStatus("Uploading to storage...")
-        const folderName = await uploadUnlimitedImages(name, pixelatedImagesResult, image.name)
-        setUploadStatus(`Successfully uploaded to: unlimited/${folderName}`)
+        const folderName = await uploadUnlimitedImages(
+          name,
+          allImages,
+          image.name,
+          groupType
+        );
+        setUploadStatus(`Successfully uploaded to: unlimited/${folderName}`);
+      } else if (submissionType === "daily") {
+        const folderName = await uploadDailyImages(
+          name,
+          allImages,
+          image.name,
+          groupType,
+          date
+        );
+        setUploadStatus(`Successfully uploaded to: daily/${folderName}`);
       }
     } catch (error) {
-      console.error("[v0] Error pixelating images:", error)
-      setUploadStatus(`Error: ${error instanceof Error ? error.message : "Unknown error"}`)
+      console.error("[v0] Error pixelating images:", error);
+      setUploadStatus(
+        `Error: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     } finally {
-      setIsProcessing(false)
+      setIsProcessing(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -76,26 +120,48 @@ export default function FormPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="date">Date</Label>
-                <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
-              </div>
+              {submissionType === "daily" && (
+                <div className="space-y-2">
+                  <Label htmlFor="date">Date</Label>
+                  <Input
+                    id="date"
+                    type="text"
+                    placeholder="DD/MM/YYYY"
+                    value={date}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^\d/]/g, "");
+                      setDate(value);
+                    }}
+                    pattern="\d{2}/\d{2}/\d{4}"
+                    maxLength={10}
+                    required
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>Group type</Label>
                 <RadioGroup
                   value={groupType}
-                  onValueChange={(value) => setGroupType(value as "boy-group" | "girl-group")}
+                  onValueChange={(value) =>
+                    setGroupType(value as "boy-group" | "girl-group")
+                  }
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="boy-group" id="boy-group" />
-                    <Label htmlFor="boy-group" className="font-normal cursor-pointer">
+                    <Label
+                      htmlFor="boy-group"
+                      className="font-normal cursor-pointer"
+                    >
                       Boy group
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="girl-group" id="girl-group" />
-                    <Label htmlFor="girl-group" className="font-normal cursor-pointer">
+                    <Label
+                      htmlFor="girl-group"
+                      className="font-normal cursor-pointer"
+                    >
                       Girl group
                     </Label>
                   </div>
@@ -106,17 +172,25 @@ export default function FormPage() {
                 <Label>Submission type</Label>
                 <RadioGroup
                   value={submissionType}
-                  onValueChange={(value) => setSubmissionType(value as "daily" | "unlimited")}
+                  onValueChange={(value) =>
+                    setSubmissionType(value as "daily" | "unlimited")
+                  }
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="daily" id="daily" />
-                    <Label htmlFor="daily" className="font-normal cursor-pointer">
+                    <Label
+                      htmlFor="daily"
+                      className="font-normal cursor-pointer"
+                    >
                       Daily
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="unlimited" id="unlimited" />
-                    <Label htmlFor="unlimited" className="font-normal cursor-pointer">
+                    <Label
+                      htmlFor="unlimited"
+                      className="font-normal cursor-pointer"
+                    >
                       Unlimited
                     </Label>
                   </div>
@@ -125,22 +199,61 @@ export default function FormPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="image">Image</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImage(e.target.files?.[0] || null)}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImage(e.target.files?.[0] || null)}
+                    required
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="image"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <svg
+                        className="w-8 h-8 mb-3 text-muted-foreground"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      <p className="mb-2 text-sm text-muted-foreground">
+                        <span className="font-semibold">Click to upload</span> or
+                        drag and drop
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {image ? image.name : "PNG, JPG, GIF up to 10MB"}
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isProcessing}>
+              <Button
+                type="submit"
+                className="w-full cursor-pointer"
+                disabled={isProcessing}
+              >
                 {isProcessing ? "Processing..." : "Submit"}
               </Button>
 
               {uploadStatus && (
                 <p
-                  className={`text-sm text-center ${uploadStatus.startsWith("Error") ? "text-destructive" : "text-green-600"}`}
+                  className={`text-sm text-center ${
+                    uploadStatus.startsWith("Error")
+                      ? "text-destructive"
+                      : "text-green-600"
+                  }`}
                 >
                   {uploadStatus}
                 </p>
@@ -155,15 +268,17 @@ export default function FormPage() {
               <CardTitle>Pixelated versions</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {pixelatedImages.map((img, index) => (
                   <div key={index} className="space-y-2">
                     <img
                       src={img.url || "/placeholder.svg"}
-                      alt={`Pixelated ${img.pixelSize}px`}
+                      alt={img.pixelSize === 0 ? "Clear" : `Pixelated ${img.pixelSize}px`}
                       className="w-full h-auto rounded-lg border"
                     />
-                    <p className="text-sm text-center text-muted-foreground">{img.pixelSize}px</p>
+                    <p className="text-sm text-center text-muted-foreground">
+                      {img.pixelSize === 0 ? "Clear" : `${img.pixelSize}px`}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -172,5 +287,5 @@ export default function FormPage() {
         )}
       </div>
     </div>
-  )
+  );
 }
