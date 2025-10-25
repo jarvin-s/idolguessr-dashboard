@@ -13,7 +13,7 @@ export async function uploadUnlimitedImages(
 ): Promise<string> {
   const supabase = getSupabaseClient()
 
-  const base64Name = btoa(name).substring(0, 5)
+  const base64Name = btoa(name).replace(/=/g, "")
 
   console.log("[v0] Base64 name:", base64Name)
   console.log("[v0] Group type:", groupType)
