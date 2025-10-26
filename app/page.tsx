@@ -33,7 +33,10 @@ export default function FormPage() {
   >([]);
   const [uploadStatus, setUploadStatus] = useState<string>("");
 
-  const filteredGroups = groupsData.filter((g) => g.type === groupType);
+  // Sort groups alphabetically by name (case-insensitive)
+  const filteredGroups = groupsData
+    .filter((g) => g.type === groupType)
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
 
   useEffect(() => {
     setGroup("");
