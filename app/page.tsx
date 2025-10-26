@@ -2,19 +2,22 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Combobox } from "@/components/ui/combobox";
 import { createPixelatedVersions } from "@/lib/pixelate-image";
 import { uploadUnlimitedImages } from "@/lib/upload-unlimited";
 import { uploadDailyImages } from "@/lib/upload-daily";
+import groupsData from "@/data/groups.json";
 
 export default function FormPage() {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
+  const [group, setGroup] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -30,8 +33,14 @@ export default function FormPage() {
   >([]);
   const [uploadStatus, setUploadStatus] = useState<string>("");
 
+  const filteredGroups = groupsData.filter((g) => g.type === groupType);
+
+  useEffect(() => {
+    setGroup("");
+  }, [groupType]);
+
   const handleFileSelect = (file: File | null) => {
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -62,7 +71,7 @@ export default function FormPage() {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files && files.length > 0) {
       handleFileSelect(files[0]);
@@ -74,6 +83,11 @@ export default function FormPage() {
 
     if (!image) {
       setUploadStatus("Error: Please select an image");
+      return;
+    }
+
+    if (!group) {
+      setUploadStatus("Error: Please select a group");
       return;
     }
 
@@ -91,7 +105,7 @@ export default function FormPage() {
         const reader = new FileReader();
         reader.onload = () => {
           fetch(reader.result as string)
-            .then(res => res.blob())
+            .then((res) => res.blob())
             .then(resolve)
             .catch(reject);
         };
@@ -101,7 +115,7 @@ export default function FormPage() {
 
       const allImages = [
         ...pixelatedImagesResult,
-        { pixelSize: 0, blob: originalBlob }
+        { pixelSize: 0, blob: originalBlob },
       ];
 
       const imagesWithUrls = allImages.map((img) => ({
@@ -111,13 +125,14 @@ export default function FormPage() {
       setPixelatedImages(imagesWithUrls);
 
       setUploadStatus("Uploading to storage...");
-      
+
       if (submissionType === "unlimited") {
         const folderName = await uploadUnlimitedImages(
           name,
           allImages,
           image.name,
-          groupType
+          groupType,
+          group
         );
         setUploadStatus(`Successfully uploaded to: unlimited/${folderName}`);
       } else if (submissionType === "daily") {
@@ -158,6 +173,18 @@ export default function FormPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="group">Group</Label>
+                <Combobox
+                  value={group}
+                  onValueChange={setGroup}
+                  options={filteredGroups}
+                  placeholder="Select a group..."
+                  emptyText="No group found."
+                  searchPlaceholder="Search group..."
                 />
               </div>
 
@@ -245,7 +272,9 @@ export default function FormPage() {
                     id="image"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
+                    onChange={(e) =>
+                      handleFileSelect(e.target.files?.[0] || null)
+                    }
                     className="hidden"
                   />
                   <label
@@ -255,8 +284,8 @@ export default function FormPage() {
                     onDragOver={handleDragOver}
                     onDrop={handleDrop}
                     className={`flex flex-col items-center justify-center w-full min-h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 ${
-                      isDragging 
-                        ? "border-primary bg-primary/10 scale-[1.02]" 
+                      isDragging
+                        ? "border-primary bg-primary/10 scale-[1.02]"
                         : "border-border hover:bg-accent/50 hover:border-primary/50"
                     }`}
                   >
@@ -278,7 +307,9 @@ export default function FormPage() {
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <svg
                           className={`w-8 h-8 mb-3 transition-colors ${
-                            isDragging ? "text-primary" : "text-muted-foreground"
+                            isDragging
+                              ? "text-primary"
+                              : "text-muted-foreground"
                           }`}
                           fill="none"
                           stroke="currentColor"
@@ -341,7 +372,11 @@ export default function FormPage() {
                   <div key={index} className="space-y-2">
                     <img
                       src={img.url || "/placeholder.svg"}
-                      alt={img.pixelSize === 0 ? "Clear" : `Pixelated ${img.pixelSize}px`}
+                      alt={
+                        img.pixelSize === 0
+                          ? "Clear"
+                          : `Pixelated ${img.pixelSize}px`
+                      }
                       className="w-full h-auto rounded-lg border"
                     />
                     <p className="text-sm text-center text-muted-foreground">

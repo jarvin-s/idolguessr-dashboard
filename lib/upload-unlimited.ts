@@ -10,12 +10,14 @@ export async function uploadUnlimitedImages(
   pixelatedImages: PixelatedImage[],
   originalFileName: string,
   groupType: string,
+  groupName: string,
 ): Promise<string> {
   const supabase = getSupabaseClient()
 
+  const base64GroupName = btoa(groupName).replace(/=/g, "")
   const base64Name = btoa(name).replace(/=/g, "")
 
-  const groupTypePath = `unlimited/${groupType}`
+  const groupTypePath = `unlimited/${groupType}/${base64GroupName}`
 
   const { data: existingFiles, error: listError } = await supabase.storage.from("images").list(groupTypePath, {
     limit: 1000,
@@ -67,5 +69,5 @@ export async function uploadUnlimitedImages(
 
   await Promise.all(uploadPromises)
 
-  return `${groupType}/${folderName}`
+  return `${groupType}/${base64GroupName}/${folderName}`
 }
