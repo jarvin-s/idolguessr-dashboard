@@ -91,11 +91,6 @@ export default function FormPage() {
       return;
     }
 
-    if (!group) {
-      setUploadStatus("Error: Please select a group");
-      return;
-    }
-
     setIsProcessing(true);
     setUploadStatus("");
 
@@ -194,6 +189,7 @@ export default function FormPage() {
                   />
                 </div>
               )}
+
               {submissionType === "daily" && (
                 <div className="space-y-2">
                   <Label htmlFor="date">Date</Label>
