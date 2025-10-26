@@ -36,7 +36,9 @@ export default function FormPage() {
   // Sort groups alphabetically by name (case-insensitive)
   const filteredGroups = groupsData
     .filter((g) => g.type === groupType)
-    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+    .sort((a, b) =>
+      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
 
   useEffect(() => {
     setGroup("");
@@ -179,18 +181,19 @@ export default function FormPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="group">Group</Label>
-                <Combobox
-                  value={group}
-                  onValueChange={setGroup}
-                  options={filteredGroups}
-                  placeholder="Select a group..."
-                  emptyText="No group found."
-                  searchPlaceholder="Search group..."
-                />
-              </div>
-
+              {submissionType === "unlimited" && (
+                <div className="space-y-2">
+                  <Label htmlFor="group">Group</Label>
+                  <Combobox
+                    value={group}
+                    onValueChange={setGroup}
+                    options={filteredGroups}
+                    placeholder="Select a group..."
+                    emptyText="No group found."
+                    searchPlaceholder="Search group..."
+                  />
+                </div>
+              )}
               {submissionType === "daily" && (
                 <div className="space-y-2">
                   <Label htmlFor="date">Date</Label>
