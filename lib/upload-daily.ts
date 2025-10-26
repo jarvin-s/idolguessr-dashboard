@@ -19,20 +19,12 @@ export async function uploadDailyImages(
     throw new Error("Invalid date format. Expected DD/MM/YYYY")
   }
   const [day, month, year] = dateParts
-  // Trim year to last 2 digits (2025 -> 25)
   const shortYear = year.slice(-2)
   const formattedDate = `${day}${month}${shortYear}`
 
-  // Convert DD/MM/YYYY to YYYY-MM-DD 00:00:00+02
   const playDate = `${year}-${month}-${day} 00:00:00+02`
 
-  console.log("[v0] Formatted date:", formattedDate)
-  console.log("[v0] Play date:", playDate)
-  console.log("[v0] Group type:", groupType)
-
   const folderPath = `daily/${groupType}/${formattedDate}`
-
-  console.log("[v0] Uploading to folder:", folderPath)
 
   const fileExtension = originalFileName.split(".").pop() || "png"
 
@@ -43,15 +35,12 @@ export async function uploadDailyImages(
       : `${String(index + 1).padStart(3, "0")}.${fileExtension}`
     const filePath = `${folderPath}/${fileName}`
 
-    console.log("[v0] Uploading:", filePath)
-
     const { error: uploadError } = await supabase.storage.from("images").upload(filePath, blob, {
       contentType: blob.type,
       upsert: false,
     })
 
     if (uploadError) {
-      console.error("[v0] Upload error for", fileName, ":", uploadError)
       throw new Error(`Failed to upload ${fileName}: ${uploadError.message}`)
     }
 
@@ -59,8 +48,6 @@ export async function uploadDailyImages(
   })
 
   await Promise.all(uploadPromises)
-
-  console.log("[v0] All images uploaded successfully to:", folderPath)
 
   // Insert record into daily table
   const { data: insertData, error: insertError } = await supabase
@@ -74,11 +61,8 @@ export async function uploadDailyImages(
     .select()
 
   if (insertError) {
-    console.error("[v0] Database insert error:", insertError)
     throw new Error(`Failed to insert daily record: ${insertError.message}`)
   }
-
-  console.log("[v0] Database record inserted:", insertData)
 
   return `${groupType}/${formattedDate}`
 }

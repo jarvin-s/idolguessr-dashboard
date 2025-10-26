@@ -16,6 +16,8 @@ export default function FormPage() {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [groupType, setGroupType] = useState<"boy-group" | "girl-group">(
     "boy-group"
   );
@@ -28,10 +30,52 @@ export default function FormPage() {
   >([]);
   const [uploadStatus, setUploadStatus] = useState<string>("");
 
+  const handleFileSelect = (file: File | null) => {
+    if (file && file.type.startsWith('image/')) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!image) return;
+    if (!image) {
+      setUploadStatus("Error: Please select an image");
+      return;
+    }
 
     setIsProcessing(true);
     setUploadStatus("");
@@ -65,9 +109,6 @@ export default function FormPage() {
         url: URL.createObjectURL(img.blob),
       }));
       setPixelatedImages(imagesWithUrls);
-
-      console.log("[v0] Generated images (5 pixelated + 1 clear):", allImages);
-      console.log("[v0] Form data:", { name, date, groupType, submissionType });
 
       setUploadStatus("Uploading to storage...");
       
@@ -204,37 +245,64 @@ export default function FormPage() {
                     id="image"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setImage(e.target.files?.[0] || null)}
-                    required
+                    onChange={(e) => handleFileSelect(e.target.files?.[0] || null)}
                     className="hidden"
                   />
                   <label
                     htmlFor="image"
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}
+                    className={`flex flex-col items-center justify-center w-full min-h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 ${
+                      isDragging 
+                        ? "border-primary bg-primary/10 scale-[1.02]" 
+                        : "border-border hover:bg-accent/50 hover:border-primary/50"
+                    }`}
                   >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <svg
-                        className="w-8 h-8 mb-3 text-muted-foreground"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    {imagePreview ? (
+                      <div className="relative w-full h-full p-4">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="max-w-full max-h-64 mx-auto rounded-lg object-contain"
                         />
-                      </svg>
-                      <p className="mb-2 text-sm text-muted-foreground">
-                        <span className="font-semibold">Click to upload</span> or
-                        drag and drop
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {image ? image.name : "PNG, JPG, GIF up to 10MB"}
-                      </p>
-                    </div>
+                        <p className="mt-2 text-sm text-center text-muted-foreground">
+                          {image?.name}
+                        </p>
+                        <p className="text-xs text-center text-muted-foreground">
+                          Click or drag to replace
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg
+                          className={`w-8 h-8 mb-3 transition-colors ${
+                            isDragging ? "text-primary" : "text-muted-foreground"
+                          }`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                          />
+                        </svg>
+                        <p className="mb-2 text-sm text-muted-foreground">
+                          <span className="font-semibold">
+                            {isDragging ? "Drop image here" : "Click to upload"}
+                          </span>
+                          {!isDragging && " or drag and drop"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          PNG, JPG, GIF up to 10MB
+                        </p>
+                      </div>
+                    )}
                   </label>
                 </div>
               </div>

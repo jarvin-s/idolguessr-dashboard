@@ -15,9 +15,6 @@ export async function uploadUnlimitedImages(
 
   const base64Name = btoa(name).replace(/=/g, "")
 
-  console.log("[v0] Base64 name:", base64Name)
-  console.log("[v0] Group type:", groupType)
-
   const groupTypePath = `unlimited/${groupType}`
 
   const { data: existingFiles, error: listError } = await supabase.storage.from("images").list(groupTypePath, {
@@ -30,12 +27,8 @@ export async function uploadUnlimitedImages(
     throw new Error(`Failed to list existing folders: ${listError.message}`)
   }
 
-  console.log("[v0] Existing files:", existingFiles)
-
   const matchingFolders =
     existingFiles?.filter((file: { name: string }) => file.name.startsWith(base64Name)).map((file: { name: string }) => file.name) || []
-
-  console.log("[v0] Matching folders:", matchingFolders)
 
   let maxIncrement = 0
   matchingFolders.forEach((folderName: string) => {
@@ -51,8 +44,6 @@ export async function uploadUnlimitedImages(
   const nextIncrement = maxIncrement + 1
   const folderName = `${base64Name}-${String(nextIncrement).padStart(3, "0")}`
 
-  console.log("[v0] Uploading to folder:", `${groupTypePath}/${folderName}`)
-
   const fileExtension = originalFileName.split(".").pop() || "png"
 
   const uploadPromises = pixelatedImages.map(async ({ pixelSize, blob }, index) => {
@@ -62,15 +53,12 @@ export async function uploadUnlimitedImages(
       : `${String(index + 1).padStart(3, "0")}.${fileExtension}`
     const filePath = `${groupTypePath}/${folderName}/${fileName}`
 
-    console.log("[v0] Uploading:", filePath)
-
     const { error: uploadError } = await supabase.storage.from("images").upload(filePath, blob, {
       contentType: blob.type,
       upsert: false,
     })
 
     if (uploadError) {
-      console.error("[v0] Upload error for", fileName, ":", uploadError)
       throw new Error(`Failed to upload ${fileName}: ${uploadError.message}`)
     }
 
@@ -78,8 +66,6 @@ export async function uploadUnlimitedImages(
   })
 
   await Promise.all(uploadPromises)
-
-  console.log("[v0] All images uploaded successfully to:", `${groupTypePath}/${folderName}`)
 
   return `${groupType}/${folderName}`
 }
