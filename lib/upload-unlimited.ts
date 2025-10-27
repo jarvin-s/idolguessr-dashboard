@@ -69,5 +69,21 @@ export async function uploadUnlimitedImages(
 
   await Promise.all(uploadPromises)
 
+  const { data: insertData, error: insertError } = await supabase
+    .from("unlimited_images")
+    .insert({
+      name: name,
+      group_name: groupName,
+      img_bucket: folderName,
+      group_category: groupType,
+      base64_group: base64GroupName,
+      base64_idol: base64Name,
+    })
+    .select()
+
+  if (insertError) {
+    throw new Error(`Failed to insert unlimited_images record: ${insertError.message}`)
+  }
+
   return `${groupType}/${base64GroupName}/${folderName}`
 }
