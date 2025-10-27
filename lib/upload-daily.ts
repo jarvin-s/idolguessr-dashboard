@@ -22,17 +22,14 @@ export async function uploadDailyImages(
   const shortYear = year.slice(-2)
   const formattedDate = `${day}${month}${shortYear}`
 
-  // Create a date at noon to avoid any timezone edge cases
   const playDateObj = new Date(parseInt(year), parseInt(month) - 1, parseInt(day), 12, 0, 0, 0)
-  
-  // Get timezone offset for this specific date (handles DST automatically)
-  const timezoneOffset = -playDateObj.getTimezoneOffset() // in minutes, inverted
+
+  const timezoneOffset = -playDateObj.getTimezoneOffset()
   const offsetHours = Math.floor(Math.abs(timezoneOffset) / 60)
   const offsetMinutes = Math.abs(timezoneOffset) % 60
   const offsetSign = timezoneOffset >= 0 ? '+' : '-'
   const offsetString = `${offsetSign}${String(offsetHours).padStart(2, '0')}:${String(offsetMinutes).padStart(2, '0')}`
-  
-  // Format: YYYY-MM-DD 00:00:00+XX:XX (midnight with correct timezone for that date)
+
   const playDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')} 00:00:00${offsetString}`
 
   const folderPath = `daily/${groupType}/${formattedDate}`
@@ -60,7 +57,6 @@ export async function uploadDailyImages(
 
   await Promise.all(uploadPromises)
 
-  // Insert record into daily table
   const { data: insertData, error: insertError } = await supabase
     .from("dailies")
     .insert({
