@@ -206,5 +206,29 @@
   {
     "name": "Red Velvet",
     "type": "girl-group"
+  },
+  {
+    "name": "ARTMS",
+    "type": "girl-group"
+  },
+  {
+    "name": "Loossemble",
+    "type": "girl-group"
+  },
+  {
+    "name": "MAMAMOO",
+    "type": "girl-group"
+  },
+  {
+    "name": "Girls' Generation",
+    "type": "girl-group"
+  },
+  {
+    "name": "Apink",
+    "type": "girl-group"
+  },
+  {
+    "name": "Cortis",
+    "type": "boy-group"
   }
 ]
