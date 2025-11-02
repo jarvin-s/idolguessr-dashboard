@@ -100,7 +100,7 @@
     "type": "girl-group"
   },
   {
-    "name": "NewJeans",
+    "name": "NJZ",
     "type": "girl-group"
   },
   {
@@ -229,6 +229,14 @@
   },
   {
     "name": "Cortis",
+    "type": "boy-group"
+  },
+  {
+    "name": "EXO",
+    "type": "boy-group"
+  },
+  {
+    "name": "Seventeen",
     "type": "boy-group"
   }
 ]
