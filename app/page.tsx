@@ -9,12 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Combobox } from "@/components/ui/combobox";
+import { AccessModal } from "@/components/access-modal";
 import { createPixelatedVersions } from "@/lib/pixelate-image";
 import { uploadUnlimitedImages } from "@/lib/upload-unlimited";
 import { uploadDailyImages } from "@/lib/upload-daily";
 import groupsData from "@/data/groups.json";
 
 export default function FormPage() {
+  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
   const [group, setGroup] = useState("");
@@ -38,6 +40,11 @@ export default function FormPage() {
     .sort((a, b) =>
       a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
     );
+
+  useEffect(() => {
+    const accessGranted = sessionStorage.getItem("access_granted");
+    setHasAccess(accessGranted === "true");
+  }, []);
 
   useEffect(() => {
     setGroup("");
@@ -153,6 +160,14 @@ export default function FormPage() {
       setIsProcessing(false);
     }
   };
+
+  if (hasAccess === null) {
+    return null;
+  }
+
+  if (!hasAccess) {
+    return <AccessModal onAccessGranted={() => setHasAccess(true)} />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
