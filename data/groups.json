@@ -100,7 +100,7 @@
     "type": "girl-group"
   },
   {
-    "name": "NewJeans",
+    "name": "NJZ",
     "type": "girl-group"
   },
   {
@@ -202,5 +202,41 @@
   {
     "name": "LOONA",
     "type": "girl-group"
+  },
+  {
+    "name": "Red Velvet",
+    "type": "girl-group"
+  },
+  {
+    "name": "ARTMS",
+    "type": "girl-group"
+  },
+  {
+    "name": "Loossemble",
+    "type": "girl-group"
+  },
+  {
+    "name": "MAMAMOO",
+    "type": "girl-group"
+  },
+  {
+    "name": "Girls' Generation",
+    "type": "girl-group"
+  },
+  {
+    "name": "Apink",
+    "type": "girl-group"
+  },
+  {
+    "name": "Cortis",
+    "type": "boy-group"
+  },
+  {
+    "name": "EXO",
+    "type": "boy-group"
+  },
+  {
+    "name": "Seventeen",
+    "type": "boy-group"
   }
 ]
