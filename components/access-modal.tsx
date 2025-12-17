@@ -38,13 +38,10 @@ export function AccessModal({ onAccessGranted }: AccessModalProps) {
             alt="IdolGuessr Logo"
           />
         </div>
-        <CardHeader>
-          <CardTitle>Enter access code</CardTitle>
-        </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="access-code">Access code</Label>
+              <Label htmlFor="access-code">Enter access code</Label>
               <Input
                 id="access-code"
                 type="text"
@@ -58,7 +55,11 @@ export function AccessModal({ onAccessGranted }: AccessModalProps) {
                 required
               />
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && (
+              <p className="text-sm text-destructive bg-red-200 rounded-md p-3">
+                {error}
+              </p>
+            )}
             <Button type="submit" className="w-full">
               Submit
             </Button>
