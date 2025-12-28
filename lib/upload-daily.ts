@@ -11,6 +11,7 @@ export async function uploadDailyImages(
   originalFileName: string,
   groupType: string,
   date: string,
+  groupName: string,
 ): Promise<string> {
   const supabase = getSupabaseClient()
 
@@ -64,6 +65,7 @@ export async function uploadDailyImages(
       play_date: playDate,
       group_type: groupType,
       img_bucket: formattedDate,
+      group_name: groupName,
     })
     .select()
 
