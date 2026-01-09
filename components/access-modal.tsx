@@ -56,7 +56,7 @@ export function AccessModal({ onAccessGranted }: AccessModalProps) {
               />
             </div>
             {error && (
-              <p className="text-sm text-destructive bg-red-200 rounded-md p-3">
+              <p className="text-sm text-destructive bg-red-200 p-3">
                 {error}
               </p>
             )}

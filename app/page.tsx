@@ -3,6 +3,7 @@
 import type React from "react";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -174,6 +175,15 @@ export default function FormPage() {
   return (
     <div className="min-h-screen p-4">
       <div className="w-full max-w-6xl mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">IdolGuessr Dashboard</h1>
+          <Link
+            href="/overview"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View full overview
+          </Link>
+        </div>
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-1/2">
             <RecentDailiesOverview />

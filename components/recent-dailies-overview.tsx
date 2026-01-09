@@ -33,7 +33,7 @@ function GroupCard({ group }: { group: GroupedDailies }) {
         <span className="flex items-center gap-2 text-[#f3f3f3]">
           {group.groupName}
           {group.hasUpcoming && (
-            <span className="text-xs font-normal bg-green-700 text-[#f3f3f3] px-2 py-0.5 rounded">
+            <span className="text-xs font-normal bg-green-700 text-[#f3f3f3] px-2 py-0.5">
               Upcoming:{" "}
               {group.upcomingMembers
                 .map((m) => `${m.name} (${m.daysUntil}d)`)
@@ -52,7 +52,7 @@ function GroupCard({ group }: { group: GroupedDailies }) {
           .map((member: MemberWithDate) => (
             <span
               key={member.name}
-              className="px-2 py-1 rounded text-md flex items-center gap-1"
+              className="px-2 py-1 text-md flex items-center gap-1"
             >
               {member.name}
               <span className="text-sm text-muted-foreground">
@@ -78,7 +78,7 @@ function UpcomingGroupCard({ group }: { group: UpcomingGroup }) {
         {group.members.map((member: UpcomingMember) => (
           <span
             key={member.name}
-            className="px-2 py-1 rounded text-md flex items-center gap-1"
+            className="px-2 py-1 text-md flex items-center gap-1"
           >
             {member.name}
             <span className="text-sm text-muted-foreground">
@@ -158,10 +158,10 @@ export function RecentDailiesOverview() {
       <CardHeader className="shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle>Dailies overview</CardTitle>
-          <div className="flex rounded-full bg-muted p-1 gap-1">
+          <div className="flex-full bg-muted p-1 gap-1">
             <button
               onClick={() => setViewMode("last-played")}
-              className={`px-3 py-1 text-sm cursor-pointer rounded-full ${
+              className={`px-3 py-1 text-sm cursor-pointer-full ${
                 viewMode === "last-played"
                   ? "bg-purple-400 text-white hover:bg-purple-400/90"
                   : "hover:bg-gray-200"
@@ -171,7 +171,7 @@ export function RecentDailiesOverview() {
             </button>
             <button
               onClick={() => setViewMode("upcoming")}
-              className={`px-3 py-1 text-sm cursor-pointer rounded-full ${
+              className={`px-3 py-1 text-sm cursor-pointer-full ${
                 viewMode === "upcoming"
                   ? "bg-[#03972f] text-white hover:bg-[#03972f]/90"
                   : "hover:bg-gray-200"
