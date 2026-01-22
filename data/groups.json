@@ -200,7 +200,7 @@
     "type": "girl-group"
   },
   {
-    "name": "LOONA",
+    "name": "Loona",
     "type": "girl-group"
   },
   {
@@ -236,7 +236,11 @@
     "type": "boy-group"
   },
   {
-    "name": "Seventeen",
+    "name": "SEVENTEEN",
+    "type": "boy-group"
+  },
+  {
+    "name": "Super Junior",
     "type": "boy-group"
   }
 ]
