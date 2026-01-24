@@ -203,10 +203,6 @@ export default function OverviewPage() {
     (sum, g) => sum + g.idols.filter((i) => i.status === "past").length,
     0
   );
-  const todayCount = groups.reduce(
-    (sum, g) => sum + g.idols.filter((i) => i.status === "today").length,
-    0
-  );
   const upcomingCount = groups.reduce(
     (sum, g) => sum + g.idols.filter((i) => i.status === "upcoming").length,
     0
@@ -216,10 +212,10 @@ export default function OverviewPage() {
     <div className="min-h-screen p-4">
       <div className="w-full max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Dailies Overview</h1>
+          <h1 className="text-2xl font-bold">Dailies overview</h1>
           <Link
             href="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm bg-black hover:bg-black/80 text-white p-2 transition-colors"
           >
             Back to dashboard
           </Link>
@@ -298,7 +294,7 @@ export default function OverviewPage() {
           </CardHeader>
           <CardContent>
             {/* Stats summary */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
               <div className="text-center p-3 bg-muted">
                 <div className="text-2xl font-bold">{totalIdols}</div>
                 <div className="text-sm text-muted-foreground">Total Entries</div>
@@ -306,10 +302,6 @@ export default function OverviewPage() {
               <div className="text-center p-3 bg-gray-100">
                 <div className="text-2xl font-bold text-gray-700">{pastCount}</div>
                 <div className="text-sm text-muted-foreground">Played</div>
-              </div>
-              <div className="text-center p-3 bg-purple-100">
-                <div className="text-2xl font-bold text-purple-700">{todayCount}</div>
-                <div className="text-sm text-muted-foreground">Today</div>
               </div>
               <div className="text-center p-3 bg-green-100">
                 <div className="text-2xl font-bold text-green-700">{upcomingCount}</div>

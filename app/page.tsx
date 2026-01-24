@@ -179,7 +179,7 @@ export default function FormPage() {
           <h1 className="text-2xl font-bold">IdolGuessr Dashboard</h1>
           <Link
             href="/overview"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="text-sm bg-black hover:bg-black/80 text-white p-2 transition-colors"
           >
             View full overview
           </Link>
