@@ -246,7 +246,7 @@ export default function OverviewPage() {
                           : "hover:bg-gray-200"
                       }`}
                     >
-                      Boy Groups
+                      Boy groups
                     </button>
                     <button
                       onClick={() => handleFilterModeChange("girl-group")}
@@ -256,7 +256,7 @@ export default function OverviewPage() {
                           : "hover:bg-gray-200"
                       }`}
                     >
-                      Girl Groups
+                      Girl groups
                     </button>
                   </div>
                   <label className="flex items-center gap-2 text-sm cursor-pointer">
