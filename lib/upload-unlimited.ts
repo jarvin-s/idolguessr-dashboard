@@ -11,6 +11,7 @@ export async function uploadUnlimitedImages(
   originalFileName: string,
   groupType: string,
   groupName: string,
+  generation?: number,
 ): Promise<string> {
   const supabase = getSupabaseClient()
 
@@ -78,6 +79,7 @@ export async function uploadUnlimitedImages(
       group_category: groupType,
       base64_group: base64GroupName,
       base64_idol: base64Name,
+      gen: generation,
     })
     .select()
 

@@ -31,6 +31,7 @@ export default function FormPage() {
   const [submissionType, setSubmissionType] = useState<"daily" | "unlimited">(
     "unlimited"
   );
+  const [generation, setGeneration] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [pixelatedImages, setPixelatedImages] = useState<
     { blob: Blob; pixelSize: number; url: string }[]
@@ -51,6 +52,12 @@ export default function FormPage() {
   useEffect(() => {
     setGroup("");
   }, [groupType]);
+
+  useEffect(() => {
+    if (submissionType === "daily") {
+      setGeneration("");
+    }
+  }, [submissionType]);
 
   const handleFileSelect = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -140,7 +147,8 @@ export default function FormPage() {
           allImages,
           image.name,
           groupType,
-          group
+          group,
+          generation ? parseInt(generation, 10) : undefined
         );
         setUploadStatus(`Successfully uploaded to: unlimited/${folderName}`);
       } else if (submissionType === "daily") {
@@ -234,6 +242,20 @@ export default function FormPage() {
                         pattern="\d{2}/\d{2}/\d{4}"
                         maxLength={10}
                         required
+                      />
+                    </div>
+                  )}
+
+                  {submissionType === "unlimited" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="generation">Generation</Label>
+                      <Combobox
+                        value={generation}
+                        onValueChange={setGeneration}
+                        options={[{ name: "Generation 3" }, { name: "Generation 4" }, { name: "Generation 5" }]}
+                        placeholder="Select generation..."
+                        emptyText="No generation found."
+                        searchPlaceholder="Search generation..."
                       />
                     </div>
                   )}
