@@ -252,7 +252,7 @@ export default function FormPage() {
                       <Combobox
                         value={generation}
                         onValueChange={setGeneration}
-                        options={[{ name: "Generation 3" }, { name: "Generation 4" }, { name: "Generation 5" }]}
+                        options={[{ name: "3" }, { name: "4" }, { name: "5" }]}
                         placeholder="Select generation..."
                         emptyText="No generation found."
                         searchPlaceholder="Search generation..."

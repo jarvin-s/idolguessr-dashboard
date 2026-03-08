@@ -70,7 +70,7 @@ export async function uploadUnlimitedImages(
 
   await Promise.all(uploadPromises)
 
-  const { data: insertData, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from("unlimited_images")
     .insert({
       name: name,
